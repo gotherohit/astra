@@ -1,0 +1,41 @@
+{
+
+	"schemaVersion": 1,
+	"updatedAt": "2026-06-11T00:00:00Z",
+	"providers": {
+		"openai": {
+
+			"name": "OpenAI",
+			"authSupported":["apiKey"],
+			"authConfig":{},
+			"sdkAdapter":"openai",
+			"models":["gpt-4o", "gpt-4o-mini"],
+			"envVar": "OPENAI_API_KEY",
+			"requiresAPIKey": true,
+			"addnProviderConfig": {}
+		},
+		"anthropic": {
+       			 "name": "Anthropic",
+       			 "authSupported": ["apiKey"],
+       			 "authConfig": {},
+       			 "sdkAdapter": "anthropic",
+      	 		 "models": ["claude-sonnet-4-6", "claude-haiku-4-5"],
+       			 "envVar": "ANTHROPIC_API_KEY",
+       			 "requiresApiKey": true,
+       			 "addnProviderConfig": { "switchableMidSession": true }
+     	      },
+	      "ollama": {
+       			 "name": "Ollama (local)",
+       			 "authSupported": ["apiKey"],
+       			 "authConfig": {},
+       			 "sdkAdapter": "openai-compatible",
+       			 "baseUrl": "http://localhost:11434/v1",
+      			 "models": [],
+       			 "envVar": "",
+       			 "requiresApiKey": false,
+       			 "addnProviderConfig": {}
+     	    }
+
+	  }
+
+}
