@@ -11,7 +11,7 @@
 			"sdkAdapter":"openai",
 			"models":["gpt-4o", "gpt-4o-mini"],
 			"envVar": "OPENAI_API_KEY",
-			"requiresAPIKey": true,
+			"requiresApiKey": true,
 			"addnProviderConfig": {}
 		},
 		"anthropic": {
