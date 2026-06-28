@@ -10,6 +10,8 @@ const AuthMethodSchema = z.enum(['apiKey', 'oauth', 'credentialsFile']);
 
 const CredentialStorageSchema = z.enum(['plain', 'keychain', 'encrypted']);
 
+export type CredentialStorage = z.infer<typeof CredentialStorageSchema>;
+
 // Provider facts live in registry. User choice for the provider for the moment live in config
 
 const ProviderConfigSchema = z.object({

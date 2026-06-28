@@ -2,13 +2,15 @@ import { Box, Text } from 'ink';
 import { ConversationTurn} from '../agent/types.js';
 
 interface ResponseViewProps {
-	history: conversationTurn[];
+	history: ConversationTurn[];
+	streamingText?: string;
 }
 
 // ResponseViewProps below is type of the prop object not just history property inside it which we are destructuring
-export function ResponseView({ history }: ResponseViewProps) {
+export function ResponseView({ history, streamingText }: ResponseViewProps) {
 
-	if (history.length === 0) {
+	const isStreaming = streamingText !== undefined && streamingText !== '';
+	if (history.length === 0 && !isStreaming) {
 		return (
 			<Box marginTop={1} paddingX={1}>
 			<Text color="gray" dimColor>
@@ -24,7 +26,7 @@ export function ResponseView({ history }: ResponseViewProps) {
 	//gap={1} adds 1 blank line between each child box
 	<Box flexDirection="column" gap={1} marginTop={1}>
 	{/* history.map() return an array for each turn transforming it into JSX like [JSX1, JSX2,....]*/}
-	{/* if we have lsit of item like .map here will return it is REQUIRED to have unique key defined as prop for each item in list*/}
+	{/* if we have list of item like .map here will return it is REQUIRED to have unique key defined as prop for each item in list*/}
 	{history.map((turn)=>(
 			<Box key={turn.id} 
 			flexDirection="column" 
@@ -50,6 +52,25 @@ export function ResponseView({ history }: ResponseViewProps) {
 			</Text>
 			</Box>
 				))}
+
+	{/* The LIVE partial turn. Re-renders everytime App grows `streamingText`*/}
+	{isStreaming && (
+	<Box
+	flexDirection="column"
+	paddingLeft={2}
+	borderStyle="single"
+	borderColor="green"
+	borderLeft={true}
+	borderRight={false}
+	borderTop={false}
+	borderBottom={false}
+	>
+	<Box flexDirection="row" gap={1}>
+		<Text color="green" bold>Astra:</Text>
+		<Text wrap="wrap">{streamingText}▌</Text>
+	</Box>
+	</Box>
+	)}
 	</Box>
 	);
 	

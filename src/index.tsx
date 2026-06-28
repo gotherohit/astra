@@ -1,8 +1,7 @@
 // "render" is an Ink function that boots up a React app in the terminal
 // It is equivalent of ReactDOM.render() in a browser app
 
-import { render } from 'ink';
-
+import { render } from 'ink'
 // createElement is a React's way of creating Component instance
 // writing <App /> in JSX is exactly same the same as createElement(App)
 // We use createElement here to show what jsx actually compiles to
