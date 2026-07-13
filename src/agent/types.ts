@@ -2,6 +2,7 @@
 // No React or Ink imports here — pure TypeScript only.
 
 // Overall exclusive state App can be in
+import type { LanguageModelUsage } from 'ai';
 
 export type AppStatus = 'idle' | 'running' | 'configuring';
 // One completed exchange between user and agent
@@ -22,4 +23,5 @@ export interface AgentInput {
 export interface AgentOutput {
     response: string;
     durationMs: number;
+    usage?: LanguageModelUsage;
   }
