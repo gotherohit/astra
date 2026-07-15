@@ -3,7 +3,7 @@ import { useState, useCallback} from 'react';
 // Box from ink our root layout container
 // useApp is a hook from ink that let's you manage the app lifecycle ex. quiting the app in specific scenario
 import { Box, Text, useApp, useInput } from 'ink';
-import { ConversationTurn, AppStatus } from './agent/types.js';
+import { ConversationTurn, AppStatus, Segment } from './agent/types.js';
 import { AstraAgent } from './agent/AstraAgent.js';
 // import our Header component
 import { Header } from './components/Header.js';
@@ -26,7 +26,7 @@ export function App() {
 	const [currentPrompt, setCurrentPrompt] = useState<string>('');
 	const [history, setHistory] = useState<ConversationTurn[]>([]);
 	// the live partial answer. '' when idle; grows token by token while streaming
-	const [streamingText, setStreamingText] = useState<string>('');
+	const [liveTurn, setLiveTurn] = useState<Segment[]>([]);
 
 	//useInput is an Ink hook that listens for keypresses, so if Esc is clicked in config mode we go to idle mode else exit
 	// empty callback for now - just having it registered keeps Ink alive
@@ -59,7 +59,7 @@ export function App() {
 			// --- normal Prompt: currently placeholder
 			setStatus('running');
 			setCurrentPrompt('');
-			setStreamingText('');
+			setLiveTurn([]);
 			// build model
 			
 			let active;
@@ -74,7 +74,19 @@ export function App() {
 
 			// run the stream
 			try {
-				const output = await agent.run({prompt: trimmed, conversationHistory: history}, {model: active.model, onToken: (delta) => setStreamingText((prev) => prev + delta),},);
+				const output = await agent.run({prompt: trimmed, conversationHistory: history}, {model: active.model, 
+			onToken: (delta) => setLiveTurn((prev) => {
+					const last = prev[prev.length - 1];
+					if (last !== undefined && last.type === 'text') {
+						const extended = {...last, text: last.text + delta};
+						return [...prev.slice(0, -1), extended];
+					} 
+
+					return [...prev, {type: 'text', text: delta}]
+				}),
+
+				onEvent: (event) => setLiveTurn((prev) => [...prev, event]),
+				},);
 			setHistory((prev) => [...prev, {id: crypto.randomUUID(), userPrompt: trimmed, agentResponse: output.response, timestamp: new Date()},]);
 			} catch (err) {
 			 setHistory((prev) => [
@@ -84,7 +96,7 @@ export function App() {
 
 			} finally {
 
-				setStreamingText('');
+				setLiveTurn([]);
 				setStatus('idle');
 			}
 		},
@@ -96,9 +108,9 @@ export function App() {
 		// padding={1} adds 1 cell of space on all sides
 		<Box flexDirection="column" padding={1}> 
 			<Header />
-			<ResponseView history={history} streamingText={streamingText} />
+			<ResponseView history={history} liveTurn={liveTurn} />
 			{/* Conditional rendering using && right side renders only if left is true*/}
-			{status === 'running' && streamingText === '' && <Text color="yellow">Astra is Thinking</Text>}
+			{status === 'running' && liveTurn.length === 0 && <Text color="yellow">Astra is Thinking</Text>}
 			{status !== 'configuring' && (
 			<PromptInput 
 			value={currentPrompt}

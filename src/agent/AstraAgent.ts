@@ -5,7 +5,7 @@ import {
 	type ToolResultPart,
 	type LanguageModelUsage
 } from 'ai';
-import type { AgentInput, AgentOutput } from './types.js';
+import type { AgentInput, AgentOutput, AgentEvent } from './types.js';
 import { buildSystemPrompt } from './systemPrompt.js';
 import { buildModelTools, dispatch } from './tools/index.js';
 // Let's define AstraAgent class
@@ -13,11 +13,13 @@ import { buildModelTools, dispatch } from './tools/index.js';
 export interface RunOptions {
 	model: LanguageModel;
 	onToken: (delta: string) => void;
+	onEvent?: (event: AgentEvent) => void;
 	system?: string;
 }
 
 // Hard cap for model to not go in infinite loop -> Later to be configurable
 const MAX_STEP = 50;
+const MAX_EVENT_PREVIEW = 200;
 // per model call give
 interface StepResult {
 	text: string;
@@ -91,8 +93,12 @@ export class AstraAgent {
 			const toolResults: ToolResultPart[] = [];
 
 			for (const call of step.toolCalls) {
-
+				// render in UI tool call step
+				options.onEvent?.({type:'tool-call', toolName: call.toolName, input: call.input});
 				const output = await dispatch(call.toolName, call.input);
+				// render in UI tool-result preview
+				const preview = output.length > MAX_EVENT_PREVIEW ? output.slice(0, MAX_EVENT_PREVIEW) + `...(${output.length} chars)` : output;
+				options.onEvent?.({type:'tool-result', toolName: call.toolName, output: preview});
 				toolResults.push({
 
 					type: 'tool-result',

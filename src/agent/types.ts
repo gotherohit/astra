@@ -25,3 +25,9 @@ export interface AgentOutput {
     durationMs: number;
     usage?: LanguageModelUsage;
   }
+
+export type AgentEvent = 
+	| {type: 'tool-call'; toolName: string; input: unknown}
+	| {type: 'tool-result'; toolName: string; output: string};
+
+export type Segment = {type: 'text'; text: string } | AgentEvent;

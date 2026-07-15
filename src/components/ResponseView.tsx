@@ -1,15 +1,47 @@
 import { Box, Text } from 'ink';
-import { ConversationTurn} from '../agent/types.js';
+import { ConversationTurn, Segment } from '../agent/types.js';
 
 interface ResponseViewProps {
 	history: ConversationTurn[];
-	streamingText?: string;
+	liveTurn: Segment[];
+}
+
+// renderer for each Segment from Segment[]
+
+function renderSegment(seg: Segment, index: number, isLast: boolean) {
+
+	switch(seg.type) {
+		case 'text':
+			return (
+			<Text key={index} wrap="wrap">
+			{seg.text}
+			{isLast ? '▌' : '' }
+			</Text>
+		);
+
+		case 'tool-call':
+			return (
+			<Text key={index} color="magenta">
+				🔧 {seg.toolName}({JSON.stringify(seg.input)})
+			</Text>
+		);
+
+		case 'tool-result':
+                      // the (previewed) result — dimmed, secondary
+                      return (
+                              <Text key={index} color="gray" dimColor>
+                                      ↳ {seg.output}
+                              </Text>
+                      );
+	
+	}
+
 }
 
 // ResponseViewProps below is type of the prop object not just history property inside it which we are destructuring
-export function ResponseView({ history, streamingText }: ResponseViewProps) {
+export function ResponseView({ history, liveTurn }: ResponseViewProps) {
 
-	const isStreaming = streamingText !== undefined && streamingText !== '';
+	const isStreaming = liveTurn.length > 0;
 	if (history.length === 0 && !isStreaming) {
 		return (
 			<Box marginTop={1} paddingX={1}>
@@ -65,10 +97,8 @@ export function ResponseView({ history, streamingText }: ResponseViewProps) {
 	borderTop={false}
 	borderBottom={false}
 	>
-	<Box flexDirection="row" gap={1}>
-		<Text color="green" bold>Astra:</Text>
-		<Text wrap="wrap">{streamingText}▌</Text>
-	</Box>
+	<Text color="green" bold>Astra:</Text>
+	{liveTurn.map((seg, i) => renderSegment(seg, i, i === liveTurn.length - 1),)}
 	</Box>
 	)}
 	</Box>
